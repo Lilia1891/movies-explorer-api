@@ -4,9 +4,7 @@ const validator = require('validator');
 const movieSchema = new mongoose.Schema({
   country: {
     type: String,
-    minlength: 2,
-    maxlength: 30,
-    default: '',
+    required: true,
   },
   director: {
     type: String,
@@ -54,7 +52,7 @@ const movieSchema = new mongoose.Schema({
     required: true,
   },
   movieId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
   },
   nameRU: {
