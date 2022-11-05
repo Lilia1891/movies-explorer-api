@@ -1,6 +1,10 @@
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const NotFoundError = require('../Errors/NotFoundError');
 const ValidationError = require('../Errors/ValidationError');
+const AuthorizationError = require('../Errors/AuthorizationError');
+
+const { NODE_ENV, JWT_SECRET } = process.env;
 
 module.exports.getUser = (req, res, next) => {
   User.findById(req.user._id)
@@ -30,4 +34,18 @@ module.exports.updateUser = (req, res, next) => {
         next(err);
       }
     });
+};
+
+module.exports.login = (req, res, next) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', { expiresIn: '7d' });
+      res.send({ token });
+    })
+    .catch(() => {
+      next(new AuthorizationError('Неправильные почта или пароль'));
+    })
+    .catch(next);
 };
