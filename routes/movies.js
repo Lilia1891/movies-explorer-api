@@ -7,8 +7,8 @@ const {
 } = require('../controllers/movies');
 const urlRegExp = require('../utils');
 
-router.get('/movies', getMovies);
-router.post('/movies', celebrate({
+router.get('/', getMovies);
+router.post('/', celebrate({
   body: Joi.object().keys({
     country: Joi.string().required(),
     director: Joi.string().required(),
@@ -18,12 +18,12 @@ router.post('/movies', celebrate({
     image: Joi.string().required().regex(urlRegExp),
     trailerLink: Joi.string().required().regex(urlRegExp),
     thumbnail: Joi.string().required().regex(urlRegExp),
-    movieId: Joi.string().length(24).required().hex(),
+    movieId: Joi.number().required(),
     nameRU: Joi.string().required(),
     nameEN: Joi.string().required(),
   }),
 }), createMovie);
-router.delete('/movies/:_id', celebrate({
+router.delete('/:movieId', celebrate({
   params: Joi.object().keys({
     movieId: Joi.string().length(24).required().hex(),
   }),

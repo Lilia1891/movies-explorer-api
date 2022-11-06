@@ -1,8 +1,10 @@
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const User = require('../models/user');
 const NotFoundError = require('../Errors/NotFoundError');
 const ValidationError = require('../Errors/ValidationError');
 const AuthorizationError = require('../Errors/AuthorizationError');
+const RegistrationError = require('../Errors/RegistrationError');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
@@ -30,6 +32,33 @@ module.exports.updateUser = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new ValidationError('Переданы некорректные данные'));
+      } else {
+        next(err);
+      }
+    });
+};
+
+module.exports.createUser = (req, res, next) => {
+  const {
+    name, email, password,
+  } = req.body;
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      name,
+      email,
+      password: hash,
+    }))
+    .then((user) => res.send({
+      data: {
+        name: user.name,
+        email: user.email,
+      },
+    }))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new ValidationError('Переданы некорректные данные при создании пользователя.'));
+      } else if (err.code === 11000) {
+        next(new RegistrationError('Такой email уже существует.'));
       } else {
         next(err);
       }

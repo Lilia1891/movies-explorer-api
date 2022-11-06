@@ -1,20 +1,25 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
 const { celebrate, Joi } = require('celebrate');
 const { errors } = require('celebrate');
 const userRouter = require('./routes/users');
 const movieRouter = require('./routes/movies');
-const auth = require('./middlewares/auth');
 const {
   createUser,
   login,
 } = require('./controllers/users');
+const auth = require('./middlewares/auth');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const { INTERNAL_SERVER_ERROR } = require('./constants');
 
 const { PORT = 3000 } = process.env;
 const app = express();
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(requestLogger);
+
 app.use('/users', auth, userRouter);
 app.use('/movies', auth, movieRouter);
 
@@ -26,9 +31,9 @@ app.post('/signin', celebrate({
 }), login);
 app.post('/signup', celebrate({
   body: Joi.object().keys({
+    name: Joi.string().min(2).max(30),
     email: Joi.string().required().email(),
     password: Joi.string().required(),
-    name: Joi.string().min(2).max(30),
   }),
 }), createUser);
 
