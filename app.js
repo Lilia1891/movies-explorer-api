@@ -1,5 +1,7 @@
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { celebrate, Joi } = require('celebrate');
@@ -12,16 +14,26 @@ const {
 } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
-const { INTERNAL_SERVER_ERROR } = require('./constants');
+const { INTERNAL_SERVER_ERROR, corsOptions } = require('./constants');
+const NotFoundError = require('./Errors/NotFoundError');
 
 const { PORT = 3000 } = process.env;
 const app = express();
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(requestLogger);
+app.use(helmet());
+app.options('*', cors());
 
 app.use('/users', auth, userRouter);
 app.use('/movies', auth, movieRouter);
+
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Сервер сейчас упадёт');
+  }, 0);
+});
 
 app.post('/signin', celebrate({
   body: Joi.object().keys({
@@ -37,6 +49,9 @@ app.post('/signup', celebrate({
   }),
 }), createUser);
 
+app.use('*', auth, (req, res, next) => {
+  next(new NotFoundError('Страница не найдена'));
+});
 app.use(errorLogger);
 
 app.use(errors());

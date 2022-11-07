@@ -4,6 +4,15 @@ const INTERNAL_SERVER_ERROR = 500;
 const UNAUTHORIZED = 401;
 const REGISTRATION_ERROR = 409;
 const FORBIDDEN_ERROR = 403;
+const corsOptions = {
+  origin: [
+    'https://lilia.nomoredomains.icu',
+    'http://lilia.nomoredomains.icu',
+    'http://localhost:3000',
+  ],
+  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+  credentials: true,
+};
 
 module.exports = {
   BAD_REQUEST_ERROR,
@@ -12,4 +21,5 @@ module.exports = {
   UNAUTHORIZED,
   REGISTRATION_ERROR,
   FORBIDDEN_ERROR,
+  corsOptions,
 };
