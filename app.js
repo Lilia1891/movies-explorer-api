@@ -7,8 +7,9 @@ const { errors } = require('celebrate');
 const routes = require('./routes/index');
 const auth = require('./middlewares/auth');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
-const { INTERNAL_SERVER_ERROR, corsOptions } = require('./constants');
+const { corsOptions } = require('./constants');
 const NotFoundError = require('./Errors/NotFoundError');
+const ErrorsHandler = require('./middlewares/errors-handler');
 
 const { PORT = 3000 } = process.env;
 const { DBADRESS = 'mongodb://localhost:27017/moviesdb' } = process.env;
@@ -27,12 +28,7 @@ app.use(errorLogger);
 
 app.use(errors());
 
-app.use((err, req, res, next) => {
-  const status = err.status || INTERNAL_SERVER_ERROR;
-  const message = status === INTERNAL_SERVER_ERROR ? 'Ошибка сервера' : err.message;
-  res.status(status).send({ message });
-  next();
-});
+app.use(ErrorsHandler);
 
 mongoose.connect(DBADRESS, {
   useNewUrlParser: true,
