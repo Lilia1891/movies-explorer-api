@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const { errors } = require('celebrate');
 const routes = require('./routes/index');
 const auth = require('./middlewares/auth');
+const limiter = require('./utils/limiter');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const { corsOptions } = require('./constants');
 const NotFoundError = require('./Errors/NotFoundError');
@@ -19,6 +20,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(requestLogger);
 app.use(helmet());
+app.use(limiter);
 app.options('*', cors());
 app.use(routes);
 app.use('*', auth, (req, res, next) => {
