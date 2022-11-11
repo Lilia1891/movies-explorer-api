@@ -10,9 +10,9 @@ const { requestLogger, errorLogger } = require('./middlewares/logger');
 const { corsOptions } = require('./constants');
 const NotFoundError = require('./Errors/NotFoundError');
 const ErrorsHandler = require('./middlewares/errors-handler');
+const { BASE_URL } = require('./config');
 
 const { PORT = 3000 } = process.env;
-const { DBADRESS = 'mongodb://localhost:27017/moviesdb' } = process.env;
 const app = express();
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
@@ -30,7 +30,7 @@ app.use(errors());
 
 app.use(ErrorsHandler);
 
-mongoose.connect(DBADRESS, {
+mongoose.connect(BASE_URL, {
   useNewUrlParser: true,
 });
 
