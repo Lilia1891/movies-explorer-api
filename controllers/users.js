@@ -4,16 +4,22 @@ const User = require('../models/user');
 const NotFoundError = require('../Errors/NotFoundError');
 const ValidationError = require('../Errors/ValidationError');
 const RegistrationError = require('../Errors/RegistrationError');
+const {
+  NOT_FOUND_MESSAGE,
+  VALIDATION_ID_MESSAGE,
+  VALIDATION_MESSAGE,
+  REGISTRATION_MESSAGE,
+} = require('../constants');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 module.exports.getUser = (req, res, next) => {
   User.findById(req.user._id)
-    .orFail(new NotFoundError('Запрашиваемый пользователь не найден'))
+    .orFail(new NotFoundError(NOT_FOUND_MESSAGE))
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new ValidationError('Передан некорректный id'));
+        next(new ValidationError(VALIDATION_ID_MESSAGE));
       } else {
         next(err);
       }
@@ -26,13 +32,13 @@ module.exports.updateUser = (req, res, next) => {
     { name, email },
     { new: true, runValidators: true },
   )
-    .orFail(new NotFoundError('Запрашиваемый пользователь не найден'))
+    .orFail(new NotFoundError(NOT_FOUND_MESSAGE))
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new ValidationError('Переданы некорректные данные'));
+        next(new ValidationError(VALIDATION_MESSAGE));
       } else if (err.code === 11000) {
-        next(new RegistrationError('Такой email уже существует.'));
+        next(new RegistrationError(REGISTRATION_MESSAGE));
       } else {
         next(err);
       }
@@ -57,9 +63,9 @@ module.exports.createUser = (req, res, next) => {
     }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new ValidationError('Переданы некорректные данные при создании пользователя.'));
+        next(new ValidationError(VALIDATION_MESSAGE));
       } else if (err.code === 11000) {
-        next(new RegistrationError('Такой email уже существует.'));
+        next(new RegistrationError(REGISTRATION_MESSAGE));
       } else {
         next(err);
       }
